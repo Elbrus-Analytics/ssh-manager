@@ -1,18 +1,34 @@
 from sys import stderr
+from os import getenv
 from paramiko import AutoAddPolicy, SSHClient
+from dotenv import load_dotenv
 import time
 
 def main():
-    hostname = '10.0.0.1'
-    port = 22
-    username = 'cisco'
-    password = 'cisco'
-
-
-    ssh_connection = establish_connection(hostname, port, username, password)
+    load_dotenv()
+    try:
+        vars = load_environment_variables()
+    except UnconfiguredEnvironment as e:
+        exit(e)
+    print(vars['JUMPHOST_IP'], vars['JUMPHOST_PORT'], vars['JUMPHOST_USER'], vars['JUMPHOST_PASS'])
+    ssh_connection = establish_connection(vars['JUMPHOST_IP'], vars['JUMPHOST_PORT'], vars['JUMPHOST_USER'], vars['JUMPHOST_PASS'])
     command = 'sh ip int brief\n'
     execute_command(ssh_connection, command)
     close_connection(ssh_connection)
+
+class UnconfiguredEnvironment(Exception):
+    '''Exception class for unconfigured environment variables'''
+    pass
+
+
+def load_environment_variables() -> dict[str, str]:
+    environment_variables_list = ['JUMPHOST_IP', 'JUMPHOST_PORT', 'JUMPHOST_USER', 'JUMPHOST_PASS']
+    vars = dict()
+    for var in environment_variables_list:
+        if not (env_val := getenv(var, None)):
+            raise UnconfiguredEnvironment(f"{var} is not configured")
+        vars[var] = env_val
+    return vars
 
 
 def establish_connection(host:str, port:int, user:str, key:str) -> SSHClient:
