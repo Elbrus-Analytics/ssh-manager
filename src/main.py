@@ -1,23 +1,14 @@
 from sqlite3 import connect
 from sys import stderr
 from os import getenv
-from xxlimited import Str
 from paramiko import AutoAddPolicy, SSHClient
 from dotenv import load_dotenv
 import time
 
 import paramiko
 
-def main():
-    load_dotenv()
-    try:
-        vars = load_environment_variables()
-    except UnconfiguredEnvironment as e:
-        exit(e)
-    
-    ssh_connection = establish_connection_using_jumphost('14.14.14.28', 'cisco', 'cisco')
-    execute_command(ssh_connection, 'sh ip int brief\n')
-    close_connection(ssh_connection)
+def main():  
+    pass
 
 
 class UnconfiguredEnvironment(Exception):
