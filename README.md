@@ -11,6 +11,7 @@ possibility to: - connect using a jump host
 
 ## usage
 uses .env variables to connect to the jumphost
+run from inside '/src' directory
 
 ## hint
 use 'term len 0' on cisco cli to show configuration without breaks
