@@ -1,13 +1,19 @@
+import imp
 from sqlite3 import connect
 from sys import stderr
 from os import getenv
+from os import getcwd
 from paramiko import AutoAddPolicy, SSHClient
+from datetime import date
 from dotenv import load_dotenv
 import time
-
 import paramiko
 
+path = ''
+
 def main():  
+    ssh_connection = establish_connection_using_jumphost('14.14.14.28', 'cisco', 'cisco')
+    save_output(ssh_connection, 'sh ip int brief')
     pass
 
 
@@ -72,13 +78,13 @@ def establish_connection(host:str, user:str, key:str, port=22, mute=False) -> SS
     return ssh_connection
 
 
-def execute_command(ssh_connection:SSHClient, command:str) -> None:
+def execute_command(ssh_connection:SSHClient, command:str) -> str:
     '''
     method used to execute a command using a established connection, prints the output from the command
     '''
-    ssh_connection.send(command)
+    ssh_connection.send(command+'\n')
     time.sleep(.5)
-    print(ssh_connection.recv(65535).decode("utf-8"))
+    return ssh_connection.recv(65535).decode("utf-8")
     
 
 
@@ -87,6 +93,14 @@ def close_connection(ssh_connection:SSHClient) -> None:
     method used to close a connection
     '''
     ssh_connection.close()
+
+
+def save_output(ssh_connection:SSHClient, command:str) -> None:
+    response = execute_command(ssh_connection, command)
+    hostname = response.split('\n')[-1][:-1]+'-'+str(date.today())+'.txt'
+    file = open(path+hostname, 'w')
+    file.write(response)
+    file.close()
 
 
 if __name__=="__main__":
