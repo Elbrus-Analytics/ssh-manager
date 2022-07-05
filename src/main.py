@@ -1,8 +1,4 @@
-import imp
-from sqlite3 import connect
-from sys import stderr
 from os import getenv
-from os import getcwd
 from paramiko import AutoAddPolicy, SSHClient
 from datetime import date
 from dotenv import load_dotenv
@@ -13,6 +9,7 @@ path = ''
 
 def main():  
     ssh_connection = establish_connection_using_jumphost('14.14.14.28', 'cisco', 'cisco')
+    execute_command(ssh_connection, 'term len 0')
     save_output(ssh_connection, 'sh ip int brief')
     pass
 
@@ -78,13 +75,13 @@ def establish_connection(host:str, user:str, key:str, port=22, mute=False) -> SS
     return ssh_connection
 
 
-def execute_command(ssh_connection:SSHClient, command:str) -> str:
+def execute_command(ssh_connection:SSHClient, command:str, readsize=65535) -> str:
     '''
     method used to execute a command using a established connection, prints the output from the command
     '''
     ssh_connection.send(command+'\n')
-    time.sleep(.5)
-    return ssh_connection.recv(65535).decode("utf-8")
+    time.sleep(10)
+    return ssh_connection.recv(readsize).decode("utf-8")
     
 
 
@@ -95,8 +92,11 @@ def close_connection(ssh_connection:SSHClient) -> None:
     ssh_connection.close()
 
 
-def save_output(ssh_connection:SSHClient, command:str) -> None:
-    response = execute_command(ssh_connection, command)
+def save_output(ssh_connection:SSHClient, command:str, readsize=65535) -> None:
+    '''
+    method used to execute a command and save its output to a file, following the naming format "hostname-YYYY-MM-DD.txt" for the output file
+    '''
+    response = execute_command(ssh_connection, command, readsize)
     hostname = response.split('\n')[-1][:-1]+'-'+str(date.today())+'.txt'
     file = open(path+hostname, 'w')
     file.write(response)
