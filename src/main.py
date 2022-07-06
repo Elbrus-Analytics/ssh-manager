@@ -1,28 +1,50 @@
-from audioop import add
+__author__ = 'Schmidt Tobias'
+__version__=0.1
+
 from os import getenv
 from os.path import isdir
 from os import mkdir
 from paramiko import AutoAddPolicy, SSHClient
-from datetime import date
 from dotenv import load_dotenv
 import time
+import psycopg2
+import ipaddress
 
 #directory in which the output is stored
 directory = '/home/elbrus/Desktop/ssh-manager/config/'
 #address of current endpoint
 address = None
+#environment variables
+vars = None
 
 def main():  
-    ssh_connection = establish_connection_using_jumphost('14.14.14.28', 'cisco', 'cisco')
-    save_output(ssh_connection, 'sh ip prot')
-    close_connection(ssh_connection)
-    ssh_connection = establish_connection_to_jumphost()
-    execute_command(ssh_connection, 'term len 0')
-    save_output(ssh_connection, 'sh ip prot')
-    close_connection(ssh_connection)
-    pass
-    #add database connection
+    global vars
+
+    #setup environment variables 
+    load_dotenv()
+    try:
+        vars = load_environment_variables()
+    except UnconfiguredEnvironment as e:
+        exit(e)
+
+    #connect to database
+    connection = psycopg2.connect(
+        database=vars['POSTGRES_DB'],
+        user=vars['POSTGRES_USER'],
+        password=vars['POSTGRES_PASS'],
+        host=vars['POSTGRES_HOST'],
+        port=vars['POSTGRES_PORT']
+    )
+
     #fetch jobs from db
+    with connection.cursor("ssh_device_cursor") as curs:
+        curs.execute("""SELECT device_command.command, device.ip 
+                        FROM device 
+                        INNER JOIN device_command ON device.type=device_command.type;""")
+        while (query := curs.fetchone()) is not None:
+            print(query)
+
+    pass
     #loop
     #   connect to target
     #   execute job
@@ -41,7 +63,8 @@ def load_environment_variables() -> dict[str, str]:
 
     :return dict[str, str]: a dict where the environment variables name is mapped to the value
     '''
-    environment_variables_list = ['JUMPHOST_IP', 'JUMPHOST_PORT', 'JUMPHOST_USER', 'JUMPHOST_PASS']
+    environment_variables_list = ['JUMPSERVER_IP', 'JUMPSERVER_PORT', 'JUMPSERVER_USER', 'JUMPSERVER_PASS', 
+    'POSTGRES_HOST', 'POSTGRES_USER', 'POSTGRES_PASS', 'POSTGRES_DB', 'POSTGRES_PORT']
     vars = dict()
     for var in environment_variables_list:
         if not (env_val := getenv(var, None)):
@@ -88,12 +111,8 @@ def establish_connection_to_jumphost() -> SSHClient:
 
     :return SSHClient: ssh session with target
     '''
-    load_dotenv()
-    try:
-        vars = load_environment_variables()
-    except UnconfiguredEnvironment as e:
-        exit(e)
-    ssh_connection = establish_connection(vars['JUMPHOST_IP'], vars['JUMPHOST_USER'], vars['JUMPHOST_PASS'], vars['JUMPHOST_PORT'])
+    global vars
+    ssh_connection = establish_connection(vars['JUMPSERVER_IP'], vars['JUMPSERVER_USER'], vars['JUMPSERVER_PASS'], vars['JUMPSERVER_PORT'])
     return ssh_connection
 
 
