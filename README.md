@@ -1,17 +1,20 @@
-# ssh -  git
+# ssh-manager
 Directory for all shh + git related scripts, templates and other files
 Used to connects to devices using ssh and establish a interactive bash session.
-Save the output in VSC.
+Gathers Job by connecting to a database. Executes these jobs and saves the output in a version control system.
 
 ## features
-  - use ssh with ssh key
+
+  - can ssh key depending on the given parameters
   - ssh connections using a jump server
   - ssh connections to the jump server
   - save the output of command to files
+  - version control system ;)
   - automatically initialise a git repository for the outputs
   - automatically add and commit changes in the output files
 
 ## dependencies
+
 see in 'requirements.txt'
 
 ## run locally
@@ -30,7 +33,6 @@ go to project directory
 
 ### deployment
   - add a '.env' file corresponding to '.env.example'
-  - please make sure every line in '.env' is filled, e.g. even if you dont use the ssh key variant, dont let it blank 
   - check the operating system of the jump host -> change ssh connection command in 'establish_connection_using_jumphost' in 'main.py'
   - change 'directory' variable in 'main.py'
   - change 'DIR' variable in 'initialise.sh'
