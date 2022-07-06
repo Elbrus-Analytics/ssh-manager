@@ -7,7 +7,9 @@ from datetime import date
 from dotenv import load_dotenv
 import time
 
-directory = '../config/'
+#directory in which the output is stored
+directory = '/home/elbrus/Desktop/ssh-manager/config/'
+#address of current endpoint
 address = None
 
 def main():  
@@ -15,6 +17,7 @@ def main():
     save_output(ssh_connection, 'sh ip prot')
     close_connection(ssh_connection)
     ssh_connection = establish_connection_to_jumphost()
+    execute_command(ssh_connection, 'term len 0')
     save_output(ssh_connection, 'sh ip prot')
     close_connection(ssh_connection)
     pass
@@ -51,6 +54,7 @@ def establish_connection_using_jumphost(target:str, tuser:str, tkey:str, port=22
 
     :return SSHClient: ssh session with target
     '''
+    #change depending on the operating system
     global address
     jumphost_ssh_connection = establish_connection_to_jumphost()
     time.sleep(.5)
@@ -63,6 +67,8 @@ def establish_connection_using_jumphost(target:str, tuser:str, tkey:str, port=22
     address = target.replace('.','-')
     #!!!!!
     jumphost_ssh_connection.send('term len 0\n')
+    time.sleep(.5)
+    jumphost_ssh_connection.recv(65535)
     #!!!!!
     return jumphost_ssh_connection
 
@@ -103,9 +109,6 @@ def establish_connection(host:str, user:str, key:str, port=22) -> SSHClient:
     ssh_connection_pre.set_missing_host_key_policy(AutoAddPolicy())
     ssh_connection_pre.connect(hostname=host, port=port, username=user, password=key)
     ssh_connection = ssh_connection_pre.invoke_shell()
-    #!!!!!
-    ssh_connection.send('term len 0\n')
-    #!!!!!
     return ssh_connection
 
 
@@ -142,10 +145,10 @@ def save_output(ssh_connection:SSHClient, command:str, readsize=65535) -> None:
     :param str command: command to execute
     :param int readsize: how many bytes of the response are read
     '''
-    global address
+    global address, directory
     response = execute_command(ssh_connection, command, readsize)
     path = directory+address
-    print(path)
+    print(address)
     if not isdir(path):
         mkdir(path)
     path +='/'+command.replace(' ','-')+'.txt'
