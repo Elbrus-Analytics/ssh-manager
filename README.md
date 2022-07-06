@@ -4,6 +4,7 @@ Used to connects to devices using ssh and establish a interactive bash session.
 Save the output in VSC.
 
 ## features
+  - use ssh with ssh key
   - ssh connections using a jump server
   - ssh connections to the jump server
   - save the output of command to files
@@ -29,6 +30,7 @@ go to project directory
 
 ### deployment
   - add a '.env' file corresponding to '.env.example'
+  - please make sure every line in '.env' is filled, e.g. even if you dont use the ssh key variant, dont let it blank 
   - check the operating system of the jump host -> change ssh connection command in 'establish_connection_using_jumphost' in 'main.py'
   - change 'directory' variable in 'main.py'
   - change 'DIR' variable in 'initialise.sh'
