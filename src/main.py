@@ -8,7 +8,7 @@ from paramiko import AutoAddPolicy, SSHClient
 from dotenv import load_dotenv
 import time
 import psycopg2
-import ipaddress
+from ipaddress import ip_address
 
 #directory in which the output is stored
 directory = '/home/elbrus/Desktop/ssh-manager/config/'
@@ -42,14 +42,12 @@ def main():
                         FROM device 
                         INNER JOIN device_command ON device.type=device_command.type;""")
         while (query := curs.fetchone()) is not None:
-            print(query)
+            #establish connection to target
+            ssh = establish_connection_using_jumphost(ip_address(query[1]), 'cisco', 'cisco')
 
+            #execute and save command
+            save_output(ssh, query[0])
     pass
-    #loop
-    #   connect to target
-    #   execute job
-    #   close connection
-    #end loop
 
 
 class UnconfiguredEnvironment(Exception):
