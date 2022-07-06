@@ -1,6 +1,7 @@
 __author__ = 'Schmidt Tobias'
 __version__=0.1
 
+from audioop import add
 from os import getenv
 from os.path import isdir
 from os import mkdir
@@ -43,8 +44,7 @@ def main():
                         INNER JOIN device_command ON device.type=device_command.type;""")
         while (query := curs.fetchone()) is not None:
             #establish connection to target
-            ssh = establish_connection_using_jumphost(ip_address(query[1]), 'cisco', 'cisco')
-
+            ssh = establish_connection_using_jumpserver(str(ip_address(query[1])), 'cisco', 'cisco')
             #execute and save command
             save_output(ssh, query[0])
     pass
@@ -62,7 +62,8 @@ def load_environment_variables() -> dict[str, str]:
     :return dict[str, str]: a dict where the environment variables name is mapped to the value
     '''
     environment_variables_list = ['JUMPSERVER_IP', 'JUMPSERVER_PORT', 'JUMPSERVER_USER', 'JUMPSERVER_PASS', 
-    'POSTGRES_HOST', 'POSTGRES_USER', 'POSTGRES_PASS', 'POSTGRES_DB', 'POSTGRES_PORT']
+    'POSTGRES_HOST', 'POSTGRES_USER', 'POSTGRES_PASS', 'POSTGRES_DB', 'POSTGRES_PORT',
+    'SSH_KEYFILE']
     vars = dict()
     for var in environment_variables_list:
         if not (env_val := getenv(var, None)):
@@ -71,9 +72,10 @@ def load_environment_variables() -> dict[str, str]:
     return vars
 
 
-def establish_connection_using_jumphost(target:str, tuser:str, tkey:str, port=22) -> SSHClient:
+def establish_connection_using_jumpserver(target:str, tuser:str, tkey:str, port=22) -> SSHClient:
     '''
     method used to connect to a target, using a jumphost inbetween
+    connection to jumphost uses username and password
 
     :param str target: ip address of target
     :param str tuser: username to log into target
@@ -84,7 +86,7 @@ def establish_connection_using_jumphost(target:str, tuser:str, tkey:str, port=22
     '''
     #change depending on the operating system
     global address
-    jumphost_ssh_connection = establish_connection_to_jumphost()
+    jumphost_ssh_connection = establish_connection_to_jumpserver()
     time.sleep(.5)
     jumphost_ssh_connection.send('ssh -l '+tuser+' -p '+str(port)+' '+target+'\n')
     jumphost_ssh_connection.recv(65535)
@@ -101,16 +103,51 @@ def establish_connection_using_jumphost(target:str, tuser:str, tkey:str, port=22
     return jumphost_ssh_connection
 
 
-def establish_connection_to_jumphost() -> SSHClient:
+def establish_connection_using_jumpserver_key(target:str, port=22) -> SSHClient:
+    '''
+    method used to connect to a target, using a jumphost inbetween
+    connection to jumphost uses ssh key
+
+    :param str target: ip address of target
+    :param int port: port to connect to
+
+    :return SSHClient: ssh session with target
+    '''
+    #change depending on the operating system
+    global address
+    jumphost_ssh_connection = establish_connection_to_jumpserver_key()
+    time.sleep(.5)
+    jumphost_ssh_connection.send('ssh '+target+'\n')
+    jumphost_ssh_connection.recv(65535)
+    time.sleep(2)
+    address = target.replace('.','-')
+    #!!!!!
+    jumphost_ssh_connection.send('term len 0\n')
+    time.sleep(.5)
+    jumphost_ssh_connection.recv(65535)
+    #!!!!!
+    return jumphost_ssh_connection
+
+
+def establish_connection_to_jumpserver() -> SSHClient:
     '''
     method used to establish a connection to the jumphost
-
-    :param boolean mute: set True to mute the output 
 
     :return SSHClient: ssh session with target
     '''
     global vars
     ssh_connection = establish_connection(vars['JUMPSERVER_IP'], vars['JUMPSERVER_USER'], vars['JUMPSERVER_PASS'], vars['JUMPSERVER_PORT'])
+    return ssh_connection
+
+
+def establish_connection_to_jumpserver_key() -> SSHClient:
+    '''
+    method used to establish a connection to the jumphost using a ssh key
+
+    :return SSHClient: ssh session with target
+    '''
+    global vars
+    ssh_connection = establish_connection_key(host=vars['JUMPSERVER_IP'], key_filename=vars['SSH_KEYFILE'])
     return ssh_connection
 
 
@@ -123,7 +160,6 @@ def establish_connection(host:str, user:str, key:str, port=22) -> SSHClient:
     :param str user: username to log into the target
     :param str key: password to log into the target
     :param int port: port to connect to
-    :param boolean mute: set True to mute the output
 
     :return SSHClient: ssh session with target
     '''
@@ -132,6 +168,25 @@ def establish_connection(host:str, user:str, key:str, port=22) -> SSHClient:
     ssh_connection_pre = SSHClient()
     ssh_connection_pre.set_missing_host_key_policy(AutoAddPolicy())
     ssh_connection_pre.connect(hostname=host, port=port, username=user, password=key)
+    ssh_connection = ssh_connection_pre.invoke_shell()
+    return ssh_connection
+
+
+def establish_connection_key(host:str, keyfile:str, port=22) -> SSHClient:
+    '''
+    method used to establish a connection using the address and ssh key
+    return a established connection
+
+    :param str host: IP-Address of the target
+    :param int port: port to connect to
+
+    :return SSHClient: ssh session with target
+    '''
+    global address
+    address = host.replace('.','-')
+    ssh_connection_pre = SSHClient()
+    ssh_connection_pre.set_missing_host_key_policy(AutoAddPolicy())
+    ssh_connection_pre.connect(hostname=host, port=port, key_filename=keyfile)
     ssh_connection = ssh_connection_pre.invoke_shell()
     return ssh_connection
 
