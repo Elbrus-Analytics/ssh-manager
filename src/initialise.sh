@@ -1,6 +1,8 @@
-DIR="../config"
+#!/bin/bash
+#directory in which the config is stored
+DIR="/home/elbrus/Desktop/ssh-manager/config"
 if [ -d "$DIR" ]; then
-    echo "config folder already exists!"
+    echo "error: config folder already exists!"
 else
     mkdir $DIR
     cd $DIR
