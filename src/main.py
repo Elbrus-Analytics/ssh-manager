@@ -21,6 +21,13 @@ def main():
     save_output(ssh_connection, 'sh ip prot')
     close_connection(ssh_connection)
     pass
+    #add database connection
+    #fetch jobs from db
+    #loop
+    #   connect to target
+    #   execute job
+    #   close connection
+    #end loop
 
 
 class UnconfiguredEnvironment(Exception):

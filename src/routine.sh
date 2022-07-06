@@ -1,4 +1,7 @@
 #!/bin/bash
+#script to collect data using the python job, checking for changes in config folder -> if there are some, these changes are added and commited
+
+
 #directory in which the config is stored
 DIR="/home/elbrus/Desktop/ssh-manager/config"
 
@@ -16,12 +19,14 @@ if [ -d "$DIR" ]; then
     #loop through every directory
     for f in *; do
         if [ -d "$f" ]; then
-            cd $f
             echo "info: working in directory '$f'"
+            cd $f
             
             #loop through every file in directory
             for c in *; do
                 echo "info: working in file '$c'"
+
+                #executing git commands
                 add_reply=$(git add $c)
                 commit_reply=$(git commit -m "$now--$f--$c")
             done
