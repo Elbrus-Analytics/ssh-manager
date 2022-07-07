@@ -1,0 +1,17 @@
+[Unit]
+Description=Schedule the ssh-manager service
+RefuseManualStart=no    # allow manual start
+RefuseManualStop=no     # allow manual stop
+
+[Timer]
+# if the job missed a run due it being off, the job runs afterwards 
+Persistent=True
+# 300 seconds after boot the job runs for the first time
+OnBootSec=300
+#twice a day -> 05:00:00 & 19:00:00
+OnCalendar=*-*-* 05,19:00:00
+#declairs which job to execute
+Unit=ssh-manager.service
+
+[Install]
+WantedBy=timers.target
