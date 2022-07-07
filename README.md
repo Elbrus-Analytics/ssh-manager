@@ -44,7 +44,7 @@ go to project directory
 install dependencies
 
 ```bash
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 ```
 
 run initialise script
@@ -56,7 +56,7 @@ run initialise script
 #### Option 1: automatic execution of the script
 
 ##### deployment
-  - change path of the working directory in 'ssh-manager.servic.example'
+  - change path of the working directory in 'ssh-manager.service.example'
   - change the user in 'ssh-manager.service.example'
   - in 'ssh-manager-schedule.timer.example' set custom times if wanted
 
