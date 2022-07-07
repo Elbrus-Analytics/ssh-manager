@@ -107,6 +107,8 @@ check if timer is running
     systemctl status ssh-manager-schedule.timer
 ```
 
+#####routine.sh script should now be executed automaticaly 
+
 #### Option 2: manual execution of the script
 
 run routine script
