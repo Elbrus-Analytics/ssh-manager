@@ -2,12 +2,14 @@
 Description=Service to run ssh-manager routine automaticly
 
 [Service]
+#job is starting immediatly after the start action has been called
 Type=simple
+#the user to execute the script
 User=elbrus
+#the working directory
 WorkingDirectory=/home/elbrus/Desktop/ssh-manager/src/
+#which script should be executed
 ExecStart=/bin/bash routine.sh
-Restart=always
-RestartSec=1
 
 [Install]
 WantedBy=multi-user.target
