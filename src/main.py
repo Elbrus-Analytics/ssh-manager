@@ -1,11 +1,9 @@
 __author__ = 'Schmidt Tobias'
 __version__=0.1
 
-from audioop import add
 from os import getenv
 from os.path import isdir
 from os import mkdir
-from shutil import ExecError
 from paramiko import AutoAddPolicy, SSHClient
 from dotenv import load_dotenv
 import time
@@ -45,7 +43,7 @@ def main():
                         INNER JOIN device_command ON device.type=device_command.type;""")
         while (query := curs.fetchone()) is not None:
             #establish connection to target
-            ssh = o(str(ip_address(query[1])), 'cisco', 'cisco')
+            ssh = establish_connection_using_jumpserver(str(ip_address(query[1])), 'cisco', 'cisco')
             #execute and save command
             save_output(ssh, query[0])
     pass
