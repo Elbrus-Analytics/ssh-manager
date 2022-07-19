@@ -56,15 +56,34 @@ directory = '$path'" main.py > tmp.main.py
 cat tmp.main.py > main.py
 rm -rf tmp.main.py
 
-# change Path in ssh-manager.service.example
-sed "10 c\
-WorkingDirectory=$scriptpath" ssh-manager.service.example > tmp.ssh-manager.service.example
-cat tmp.ssh-manager.service.example > ssh-manager.service.example
-rm -rf tmp.ssh-manager.service.example
+echo
+echo "The path has been set to \"$path\"!"
+echo
+
+read -p "Do you want to configure the systemd Service? (y/n/exit) " confirm
+case $confirm in
+    [yY] | "yes" | "Yes" ) echo 
+        read -p "Which User should execute the Service? " user
+    # change Path in ssh-manager.service.example
+        sed "10 c\
+        WorkingDirectory=$scriptpath" ssh-manager.service.example > tmp.ssh-manager.service.example
+        cat tmp.ssh-manager.service.example > ssh-manager.service.example
+        rm -rf tmp.ssh-manager.service.example
+    # change User in ssh-manager.service.example
+        sed "8 c\
+        User=$user" ssh-manager.service.example > tmp.ssh-manager.service.example
+        cat tmp.ssh-manager.service.example > ssh-manager.service.example
+        rm -rf tmp.ssh-manager.service.example
+    ;;
+    [nN] | "no" | "No" ) echo proceeding without configuring systemd Service;;
+    [eE] | "exit" | "Exit" ) echo exiting...;
+            exit;;
+    * ) echo invalid response;;
+esac
 
 
 echo
-echo "The path has been set to \"$path\"!"
+echo "The systemd Service has been configured!"
 echo
 
 
