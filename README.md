@@ -14,6 +14,7 @@ Gathers Job by connecting to a database. Executes these jobs and saves the outpu
   - automatically initialise a git repository for the outputs
   - automatically add and commit changes in the output files
   - use systemd to automate the script
+  - setup script
 
 ## dependencies
 
@@ -36,21 +37,12 @@ go to project directory
 ### deployment
   - add a '.env' file corresponding to '.env.example'
   - check the operating system of the jump host -> change ssh connection command in 'establish_connection_using_jumphost' in 'main.py'
-  - change 'directory' variable in 'main.py'
-  - change 'DIR' variable in 'initialise.sh'
-  - change 'DIR' variable in 'routine.sh'
-  - change path to python script in 'routine.sh'
+  - run 'setup.sh'
 
 install dependencies
 
 ```bash
     pip3 install -r requirements.txt
-```
-
-run initialise script
-
-```bash
-    src/initialise.sh
 ```
 
 #### Option 1: automatic execution of the script
