@@ -14,7 +14,7 @@ echo
 sleep 0.25
 
 read -p "Where do you want the config to be stored: (absolut path) " path
-read -p "What is the 'main.py' file stored? (absolut path) " pathtomain
+read -p "Where is the 'main.py' file stored: (absolut path) " pathtomain
 while true; do
 echo 
 echo "Do you want to store the config files at \"$path\"?" 
