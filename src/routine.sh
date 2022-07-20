@@ -1,13 +1,14 @@
 #!/bin/bash
 #script to collect data using the python job, checking for changes in config folder -> if there are some, these changes are added and commited
 
+source ../.env
 
 #directory in which the config is stored
-DIR="/home/elbrus/Desktop/ssh-manager/config"
+DIR=$CONFIGPATH
 
 echo "info: retrieving configurations"
 #execute python job
-python3 /home/elbrus/Desktop/ssh-manager/src/main.py
+python3 $MAINPATH
 
 #set current date in the Format YYYY-MM-DD-HH:MM:SS
 now=$(date +%F-%T)

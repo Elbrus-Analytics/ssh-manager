@@ -1,8 +1,10 @@
 #!/bin/bash
 #script to create a folder where config files are stored, also initialises a git repo in the config folder
 
+source ../.env
+
 #directory in which the config is stored
-DIR="/home/elbrus/Desktop/ssh-manager/config"
+DIR=$CONFIGPATH
 
 if [ -d "$DIR" ]; then
     echo "error: config folder already exists!"

@@ -10,15 +10,13 @@ import time
 import psycopg2
 from ipaddress import ip_address
 
-#directory in which the output is stored
-directory = '/home/elbrus/Desktop/ssh-manager/config/'
 #address of current endpoint
 address = None
 #environment variables
 vars = None
 
 def main():  
-    global vars
+    global vars, directory
 
     #setup environment variables 
     load_dotenv()
@@ -26,6 +24,9 @@ def main():
         vars = load_environment_variables()
     except UnconfiguredEnvironment as e:
         exit(e)
+
+    #directory in which the output is stored
+    directory=vars['CONFIGPATH']
 
     #connect to database
     connection = psycopg2.connect(
@@ -66,8 +67,8 @@ def load_environment_variables() -> dict[str, str]:
     '''
     environment_variables_list = ['JUMPSERVER_IP', 'JUMPSERVER_PORT', 'JUMPSERVER_USER', 'JUMPSERVER_PASS', 
     'POSTGRES_HOST', 'POSTGRES_USER', 'POSTGRES_PASS', 'POSTGRES_DB', 'POSTGRES_PORT',
-    'SSH_KEYFILE']
-    except_variable_list = ['JUMPSERVER_PASS', 'SSH_KEYFILE' ]
+    'SSH_KEYFILE', 'CONFIGPATH', 'MAINPATH']
+    except_variable_list = ['JUMPSERVER_PASS', 'SSH_KEYFILE', 'MAINPATH' ]
     vars = dict()
     for var in environment_variables_list:
         if not (env_val := getenv(var, None)):
